@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd
+           http://www.springframework.org/schema/jdbc
+           http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <context:annotation-config/>
+
+    <bean id="englishSpellChecker" class="com.citi.training.spring.emailer.EnglishSpellChecker"/>
+    <bean id="frenchSpellChecker" class="com.citi.training.spring.emailer.FrenchSpellChecker"/>
+    <bean id="japaneseSpellChecker" class="com.citi.training.spring.emailer.JapaneseSpellChecker"/>
+
+    <bean id="emailer" class="com.citi.training.spring.emailer.Emailer">
+        <property name="spellChecker" ref="englishSpellChecker"/>
+        <property name="jmsTemplate" ref="jmsTemplate"/>
+        <property name="topic" ref="email.topic"/>
+    </bean>
+    <bean id="client" class="com.citi.training.spring.emailer.EmailerClient">
+        <property name="emailer" ref="emailer"></property>
+    </bean>
+
+    <bean id="email.topic" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg value="email"/>
+    </bean>
+
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+    </bean>
+
+    <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://localhost:61616"/>
+    </bean>
+
+
+    <bean class="org.springframework.remoting.rmi.RmiServiceExporter">
+        <property name="serviceName" value="AccountService"/>
+        <property name="service" ref="emailer"/>
+        <property name="serviceInterface" value="com.citi.training.spring.rmi.RemoteEmailer"/>
+        <property name="registryPort" value="1199"/>
+    </bean>
+
+    <bean id="rmiEmailer" class="com.citi.training.spring.emailer.Emailer"/>
+
+
+    <bean id="testdao" class="com.citi.training.spring.jdbc.TestDao"></bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="datasource"></property>
+    </bean>
+
+    <bean id="datasource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="org.h2.Driver"></property>
+        <property name="url" value="jdbc:h2:mem:test;MVCC=true;"></property>
+        <property name="username" value="sa"></property>
+        <property name="password" value=""></property>
+    </bean>
+
+    <!--jndi && spring-->
+    <!--<bean id="mydatasource" class="org.springframework.jndi.JndiObjectFactoryBean">-->
+        <!--<property name="jndiName" value="java:comp/env/jdbc/mydatasource"></property>-->
+    <!--</bean>-->
+
+</beans>

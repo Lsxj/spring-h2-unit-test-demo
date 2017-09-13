@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/jdbc
+           http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <bean id="rmiClient" class="com.citi.training.spring.rmi.RemoteEmailerClient">
+        <property name="emailer" ref="emailerRMI"/>
+    </bean>
+
+    <bean id="emailerRMI" class=" org.springframework.remoting.rmi.RmiProxyFactoryBean">
+        <property name="serviceUrl" value="rmi://localhost:1199/AccountService"/>
+        <property name="serviceInterface" value="com.citi.training.spring.rmi.RemoteEmailer"/>
+    </bean>
+
+
+</beans>
